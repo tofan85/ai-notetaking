@@ -9,7 +9,7 @@ import (
 type Notebook struct {
 	ID        uuid.UUID
 	Name      string
-	ParentId  uuid.UUID
+	ParentId  *uuid.UUID
 	CreatedAt time.Time
 	UpdatedAt *time.Time
 	DeletedAt *time.Time

@@ -26,11 +26,14 @@ func (n *notebookRepository) UsingTx(ctx context.Context, tx database.DatabaseQu
 func (n *notebookRepository) Create(ctx context.Context, notebook *entity.Notebook) error {
 	_, err := n.db.Exec(
 		ctx,
-		`INSERT INTO notebooks (id, name, parent_id, created_at) VALUES ($1, $2, $3, $4)`,
+		`INSERT INTO notebook (id, name, parent_id, created_at, updated_at, deleted_at, is_deleted) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 		notebook.ID,
 		notebook.Name,
 		notebook.ParentId,
 		notebook.CreatedAt,
+		notebook.UpdatedAt,
+		notebook.DeletedAt,
+		notebook.IsDeleted,
 	)
 
 	if err != nil {
