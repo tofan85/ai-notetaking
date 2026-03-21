@@ -33,6 +33,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/pashagolub/pgxmock/v2 v2.12.0
 	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.51.0 // indirect

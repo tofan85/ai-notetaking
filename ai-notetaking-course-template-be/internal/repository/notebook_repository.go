@@ -8,6 +8,8 @@ import (
 	"context"
 	"errors"
 
+	"ai-notetaking-be/internal/helpers"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -66,6 +68,7 @@ func (n *notebookRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
+			helpers.Logger.Warn("Notebook not found - ID: %s", id)
 			return nil, serverutils.ErrNotFound
 		}
 		return nil, err

@@ -2,6 +2,7 @@ package main
 
 import (
 	"ai-notetaking-be/internal/controller"
+	"ai-notetaking-be/internal/helpers"
 	"ai-notetaking-be/internal/pkg/serverutils"
 	"ai-notetaking-be/internal/repository"
 	"ai-notetaking-be/internal/service"
@@ -14,6 +15,7 @@ import (
 )
 
 func main() {
+	helpers.SetupLogger()
 	godotenv.Load()
 	app := fiber.New(fiber.Config{
 		BodyLimit: 10 * 1024 * 1024,
