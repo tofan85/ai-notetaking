@@ -52,3 +52,22 @@ func (c *notebookService) Show(ctx context.Context, id uuid.UUID) (*dto.ShowNote
 		UpdatedAt: notebook.UpdatedAt,
 	}, nil
 }
+
+func (c *notebookService) UpdateNotebook(ctx context.Context, req *dto.UpdateNotebookRequest) (*dto.UpdateNotebookResponse, error) {
+	notebook, err := c.notebookRepository.GetByID(ctx, req.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now()
+	notebook.Name = req.Name
+	notebook.UpdatedAt = &now
+	err = c.notebookRepository.UpdateByID(ctx, notebook)
+	if err != nil {
+		return nil, err
+	}
+	return &dto.UpdateNotebookResponse{
+		ID:   notebook.ID,
+		Name: notebook.Name,
+	}, nil
+}

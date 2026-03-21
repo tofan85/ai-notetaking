@@ -21,6 +21,7 @@ func (c *notebookController) RegisterRoutes(r fiber.Router) {
 	h := r.Group("/notebook/v1")
 	h.Post("", c.Create)
 	h.Get(":id", c.Show)
+	h.Put(":id", c.Update)
 }
 
 func (c *notebookController) Create(ctx *fiber.Ctx) error {
@@ -51,4 +52,21 @@ func (c *notebookController) Show(ctx *fiber.Ctx) error {
 	}
 	return ctx.JSON(serverutils.SuccessResponse("Success get notebook", res))
 
+}
+
+func (c *notebookController) Update(ctx *fiber.Ctx) error {
+	idparam := ctx.Params("id")
+	id, _ := uuid.Parse(idparam)
+	var req dto.UpdateNotebookRequest
+	req.ID = id
+	if err := ctx.BodyParser(&req); err != nil {
+		return err
+	}
+
+	res, err := c.service.UpdateNotebook(ctx.Context(), &req)
+	if err != nil {
+		return err
+	}
+
+	return ctx.JSON(serverutils.SuccessResponse("Success update notebook", res))
 }

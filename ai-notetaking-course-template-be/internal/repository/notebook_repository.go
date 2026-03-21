@@ -72,3 +72,17 @@ func (n *notebookRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity
 	}
 	return &notebook, nil
 }
+
+func (n *notebookRepository) UpdateByID(ctx context.Context, notebook *entity.Notebook) error {
+	_, err := n.db.Exec(
+		ctx,
+		`UPDATE notebook SET name = $1, updated_at = $2 WHERE id = $3 AND is_deleted = false`,
+		notebook.Name,
+		notebook.UpdatedAt,
+		notebook.ID,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}

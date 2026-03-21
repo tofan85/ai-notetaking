@@ -14,11 +14,13 @@ type INotebookRepository interface {
 	UsingTx(ctx context.Context, tx database.DatabaseQueryer) INotebookRepository
 	Create(ctx context.Context, notebook *entity.Notebook) error
 	GetByID(ctx context.Context, id uuid.UUID) (*entity.Notebook, error)
+	UpdateByID(ctx context.Context, notebook *entity.Notebook) error
 }
 
 type INotebookService interface {
 	CreateNotebook(ctx context.Context, req *dto.CreateNotebookRequest) (*dto.CreateNotebookResponse, error)
 	Show(ctx context.Context, id uuid.UUID) (*dto.ShowNotebookResponse, error)
+	UpdateNotebook(ctx context.Context, req *dto.UpdateNotebookRequest) (*dto.UpdateNotebookResponse, error)
 }
 
 type INotebookController interface {

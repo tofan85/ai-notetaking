@@ -22,3 +22,13 @@ type ShowNotebookResponse struct {
 	CreateDAt time.Time  `json:"created_at"`
 	UpdatedAt *time.Time `json:"updated_at"`
 }
+
+type UpdateNotebookRequest struct {
+	ID   uuid.UUID
+	Name string `json:"name" validate:"required"`
+}
+
+type UpdateNotebookResponse struct {
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+}
