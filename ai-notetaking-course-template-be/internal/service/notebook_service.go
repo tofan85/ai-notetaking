@@ -5,6 +5,7 @@ import (
 	"ai-notetaking-be/internal/entity"
 	"ai-notetaking-be/internal/interfaces"
 	"context"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,6 +22,7 @@ func NewNotebookService(notebookRepository interfaces.INotebookRepository) inter
 }
 
 func (c *notebookService) CreateNotebook(ctx context.Context, req *dto.CreateNotebookRequest) (*dto.CreateNotebookResponse, error) {
+	log.Printf("[SERVICE] CreateNotebook - START | name=%s", req.Name)
 
 	notebook := entity.Notebook{
 		ID:        uuid.New(),
@@ -32,7 +34,7 @@ func (c *notebookService) CreateNotebook(ctx context.Context, req *dto.CreateNot
 	if err != nil {
 		return nil, err
 	}
-
+	log.Printf("[SERVICE] CreateNotebook - SUCCESS | id=%s", notebook.ID)
 	return &dto.CreateNotebookResponse{
 		ID: notebook.ID,
 	}, nil

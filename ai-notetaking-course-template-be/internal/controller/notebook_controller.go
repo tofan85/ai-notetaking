@@ -39,7 +39,6 @@ func (c *notebookController) Create(ctx *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-
 	return ctx.JSON(serverutils.SuccessResponse("Success create notebook", res))
 }
 

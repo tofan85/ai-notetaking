@@ -3,10 +3,13 @@ package repository
 import (
 	"ai-notetaking-be/internal/entity"
 	"ai-notetaking-be/internal/interfaces"
+	"ai-notetaking-be/internal/loggers"
 	"ai-notetaking-be/internal/pkg/serverutils"
 	"ai-notetaking-be/pkg/database"
 	"context"
 	"errors"
+	"log"
+	"time"
 
 	"ai-notetaking-be/internal/helpers"
 
@@ -16,22 +19,29 @@ import (
 )
 
 type notebookRepository struct {
-	db database.DatabaseQueryer
+	db     database.DatabaseQueryer
+	Logger loggers.Logger
 }
 
-func NewNotebookRepository(db *pgxpool.Pool) interfaces.INotebookRepository {
+func NewNotebookRepository(db *pgxpool.Pool, logger loggers.Logger) interfaces.INotebookRepository {
 	return &notebookRepository{
-		db: db,
+		db:     db,
+		Logger: logger,
 	}
 }
 
 func (n *notebookRepository) UsingTx(ctx context.Context, tx database.DatabaseQueryer) interfaces.INotebookRepository {
 	return &notebookRepository{
-		db: tx,
+		db:     tx,
+		Logger: n.Logger,
 	}
 }
 
 func (n *notebookRepository) Create(ctx context.Context, notebook *entity.Notebook) error {
+
+	start := time.Now()
+	memBefore := helpers.TrackMemory()
+
 	_, err := n.db.Exec(
 		ctx,
 		`INSERT INTO notebook (id, name, parent_id, created_at, updated_at, deleted_at, is_deleted) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
@@ -47,11 +57,23 @@ func (n *notebookRepository) Create(ctx context.Context, notebook *entity.Notebo
 	if err != nil {
 		return err
 	}
-
+	defer helpers.LogExecution(
+		n.Logger,
+		start,
+		&err,
+		memBefore,
+		"Repository: CreateNotebook",
+		map[string]interface{}{
+			"notebook_id": notebook.ID,
+		},
+	)
+	log.Printf("[REPOSITORY] CreateNotebook - SUCCESS | id=%s", notebook.ID)
 	return nil
 }
 
 func (n *notebookRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Notebook, error) {
+	start := time.Now()
+	memBefore := helpers.TrackMemory()
 	var notebook entity.Notebook
 	err := n.db.QueryRow(
 		ctx,
@@ -73,10 +95,22 @@ func (n *notebookRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity
 		}
 		return nil, err
 	}
+	defer helpers.LogExecution(
+		n.Logger,
+		start,
+		&err,
+		memBefore,
+		"Repository: CreateNotebook",
+		map[string]interface{}{
+			"notebook_id": notebook.ID,
+		},
+	)
 	return &notebook, nil
 }
 
 func (n *notebookRepository) UpdateByID(ctx context.Context, notebook *entity.Notebook) error {
+	start := time.Now()
+	memBefore := helpers.TrackMemory()
 	_, err := n.db.Exec(
 		ctx,
 		`UPDATE notebook SET name = $1, updated_at = $2 WHERE id = $3 AND is_deleted = false`,
@@ -87,5 +121,15 @@ func (n *notebookRepository) UpdateByID(ctx context.Context, notebook *entity.No
 	if err != nil {
 		return err
 	}
+	defer helpers.LogExecution(
+		n.Logger,
+		start,
+		&err,
+		memBefore,
+		"Repository: CreateNotebook",
+		map[string]interface{}{
+			"notebook_id": notebook.ID,
+		},
+	)
 	return nil
 }
