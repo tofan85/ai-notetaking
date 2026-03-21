@@ -133,3 +133,53 @@ func (n *notebookRepository) UpdateByID(ctx context.Context, notebook *entity.No
 	)
 	return nil
 }
+
+func (n *notebookRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	start := time.Now()
+	memBefore := helpers.TrackMemory()
+	_, err := n.db.Exec(
+		ctx,
+		`UPDATE notebook SET is_deleted = true, deleted_at = $1 WHERE id = $2 AND is_deleted = false`,
+		time.Now(),
+		id,
+	)
+	if err != nil {
+		return err
+	}
+	defer helpers.LogExecution(
+		n.Logger,
+		start,
+		&err,
+		memBefore,
+		"Repository: Delete Notebook",
+		map[string]interface{}{
+			"notebook_id": id,
+		},
+	)
+	return nil
+}
+
+func (n *notebookRepository) NullifyParentById(ctx context.Context, parentID uuid.UUID) error {
+	start := time.Now()
+	memBefore := helpers.TrackMemory()
+	_, err := n.db.Exec(
+		ctx,
+		`UPDATE notebook SET parent_id = null, updated_at = $1 WHERE parent_id = $2`,
+		time.Now(),
+		parentID,
+	)
+	if err != nil {
+		return err
+	}
+	defer helpers.LogExecution(
+		n.Logger,
+		start,
+		&err,
+		memBefore,
+		"Repository: Nullify Parent ID",
+		map[string]interface{}{
+			"parent_id": parentID,
+		},
+	)
+	return nil
+}

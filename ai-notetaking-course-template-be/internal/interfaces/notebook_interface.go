@@ -15,16 +15,20 @@ type INotebookRepository interface {
 	Create(ctx context.Context, notebook *entity.Notebook) error
 	GetByID(ctx context.Context, id uuid.UUID) (*entity.Notebook, error)
 	UpdateByID(ctx context.Context, notebook *entity.Notebook) error
+	Delete(ctx context.Context, id uuid.UUID) error
+	NullifyParentById(ctx context.Context, id uuid.UUID) error
 }
 
 type INotebookService interface {
 	CreateNotebook(ctx context.Context, req *dto.CreateNotebookRequest) (*dto.CreateNotebookResponse, error)
 	Show(ctx context.Context, id uuid.UUID) (*dto.ShowNotebookResponse, error)
 	UpdateNotebook(ctx context.Context, req *dto.UpdateNotebookRequest) (*dto.UpdateNotebookResponse, error)
+	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 type INotebookController interface {
 	RegisterRoutes(r fiber.Router)
 	Create(ctx *fiber.Ctx) error
 	Show(ctx *fiber.Ctx) error
+	Delete(ctx *fiber.Ctx) error
 }

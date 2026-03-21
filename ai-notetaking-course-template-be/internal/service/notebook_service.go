@@ -9,15 +9,19 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type notebookService struct {
 	notebookRepository interfaces.INotebookRepository
+	db                 *pgxpool.Pool
 }
 
-func NewNotebookService(notebookRepository interfaces.INotebookRepository) interfaces.INotebookService {
+func NewNotebookService(notebookRepository interfaces.INotebookRepository, db *pgxpool.Pool) interfaces.INotebookService {
 	return &notebookService{
 		notebookRepository: notebookRepository,
+		db:                 db,
 	}
 }
 
@@ -72,4 +76,30 @@ func (c *notebookService) UpdateNotebook(ctx context.Context, req *dto.UpdateNot
 		ID:   notebook.ID,
 		Name: notebook.Name,
 	}, nil
+}
+
+func (c *notebookService) Delete(ctx context.Context, id uuid.UUID) error {
+	_, err := c.notebookRepository.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	tx, err := c.db.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	noteBookRepo := c.notebookRepository.UsingTx(ctx, tx)
+	err = noteBookRepo.Delete(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	err = noteBookRepo.NullifyParentById(ctx, id)
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

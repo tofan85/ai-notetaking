@@ -32,3 +32,7 @@ type UpdateNotebookResponse struct {
 	ID   uuid.UUID `json:"id"`
 	Name string    `json:"name"`
 }
+
+type DeleteNotebookResponse struct {
+	ID uuid.UUID `json:"id"`
+}

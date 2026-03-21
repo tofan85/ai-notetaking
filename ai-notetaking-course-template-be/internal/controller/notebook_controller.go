@@ -22,6 +22,7 @@ func (c *notebookController) RegisterRoutes(r fiber.Router) {
 	h.Post("", c.Create)
 	h.Get(":id", c.Show)
 	h.Put(":id", c.Update)
+	h.Delete(":id", c.Delete)
 }
 
 func (c *notebookController) Create(ctx *fiber.Ctx) error {
@@ -68,4 +69,16 @@ func (c *notebookController) Update(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.JSON(serverutils.SuccessResponse("Success update notebook", res))
+}
+
+func (c *notebookController) Delete(ctx *fiber.Ctx) error {
+	idparam := ctx.Params("id")
+	id, _ := uuid.Parse(idparam)
+
+	err := c.service.Delete(ctx.Context(), id)
+	if err != nil {
+		return err
+	}
+
+	return ctx.JSON(serverutils.SuccessResponse[any]("Success delete notebook", nil))
 }
