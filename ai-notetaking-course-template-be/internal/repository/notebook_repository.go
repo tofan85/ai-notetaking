@@ -100,7 +100,7 @@ func (n *notebookRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity
 		start,
 		&err,
 		memBefore,
-		"Repository: CreateNotebook",
+		"Repository: Get Notebook BY ID",
 		map[string]interface{}{
 			"notebook_id": notebook.ID,
 		},
@@ -126,7 +126,7 @@ func (n *notebookRepository) UpdateByID(ctx context.Context, notebook *entity.No
 		start,
 		&err,
 		memBefore,
-		"Repository: CreateNotebook",
+		"Repository: Update Notebook BY ID",
 		map[string]interface{}{
 			"notebook_id": notebook.ID,
 		},
