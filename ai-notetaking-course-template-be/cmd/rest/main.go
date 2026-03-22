@@ -15,6 +15,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
+	apmFiber "go.elastic.co/apm/module/apmfiber"
 )
 
 func main() {
@@ -27,6 +28,7 @@ func main() {
 	})
 	logger := loggers.Logger{}
 	app.Use(middleware.LoggingMiddleware(logger))
+	app.Use(apmFiber.Middleware())
 
 	app.Use(serverutils.ErrorHandlerMiddleware())
 

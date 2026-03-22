@@ -16,6 +16,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.elastic.co/apm"
 )
 
 type notebookRepository struct {
@@ -30,6 +31,53 @@ func NewNotebookRepository(db *pgxpool.Pool, logger loggers.Logger) interfaces.I
 	}
 }
 
+func (n *notebookRepository) GetAll(ctx context.Context) ([]*entity.Notebook, error) {
+	span, _ := apm.StartSpan(ctx, "GetAll", "Repository")
+	defer span.End()
+	start := time.Now()
+	memBefore := helpers.TrackMemory()
+	var notebook entity.Notebook
+	rows, err := n.db.Query(
+		ctx,
+		`SELECT id, name, parent_id, created_at, updated_at, is_deleted FROM notebook WHERE  is_deleted = false`,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*entity.Notebook, 0)
+
+	for rows.Next() {
+		var notebook entity.Notebook
+		err = rows.Scan(
+			&notebook.ID,
+			&notebook.Name,
+			&notebook.ParentId,
+			&notebook.CreatedAt,
+			&notebook.UpdatedAt,
+			&notebook.IsDeleted,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		result = append([]*entity.Notebook{&notebook}, result...)
+	}
+	defer helpers.LogExecution(
+		n.Logger,
+		start,
+		&err,
+		memBefore,
+		"Repository: Get Notebook BY ID",
+		map[string]interface{}{
+			"notebook_id": notebook.ID,
+		},
+	)
+	return result, nil
+}
+
 func (n *notebookRepository) UsingTx(ctx context.Context, tx database.DatabaseQueryer) interfaces.INotebookRepository {
 	return &notebookRepository{
 		db:     tx,
@@ -38,7 +86,8 @@ func (n *notebookRepository) UsingTx(ctx context.Context, tx database.DatabaseQu
 }
 
 func (n *notebookRepository) Create(ctx context.Context, notebook *entity.Notebook) error {
-
+	span, _ := apm.StartSpan(ctx, "Create", "Repository")
+	defer span.End()
 	start := time.Now()
 	memBefore := helpers.TrackMemory()
 
@@ -72,6 +121,8 @@ func (n *notebookRepository) Create(ctx context.Context, notebook *entity.Notebo
 }
 
 func (n *notebookRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.Notebook, error) {
+	span, _ := apm.StartSpan(ctx, "GetByID", "Repository")
+	defer span.End()
 	start := time.Now()
 	memBefore := helpers.TrackMemory()
 	var notebook entity.Notebook
@@ -109,6 +160,8 @@ func (n *notebookRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity
 }
 
 func (n *notebookRepository) UpdateByID(ctx context.Context, notebook *entity.Notebook) error {
+	span, _ := apm.StartSpan(ctx, "UpdateByID", "Repository")
+	defer span.End()
 	start := time.Now()
 	memBefore := helpers.TrackMemory()
 	_, err := n.db.Exec(
@@ -135,6 +188,8 @@ func (n *notebookRepository) UpdateByID(ctx context.Context, notebook *entity.No
 }
 
 func (n *notebookRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	span, _ := apm.StartSpan(ctx, "Delete", "Repository")
+	defer span.End()
 	start := time.Now()
 	memBefore := helpers.TrackMemory()
 	_, err := n.db.Exec(
@@ -160,6 +215,8 @@ func (n *notebookRepository) Delete(ctx context.Context, id uuid.UUID) error {
 }
 
 func (n *notebookRepository) NullifyParentById(ctx context.Context, parentID uuid.UUID) error {
+	span, _ := apm.StartSpan(ctx, "NullifyParentById", "Repository")
+	defer span.End()
 	start := time.Now()
 	memBefore := helpers.TrackMemory()
 	_, err := n.db.Exec(
@@ -179,6 +236,32 @@ func (n *notebookRepository) NullifyParentById(ctx context.Context, parentID uui
 		"Repository: Nullify Parent ID",
 		map[string]interface{}{
 			"parent_id": parentID,
+		},
+	)
+	return nil
+}
+
+func (n *notebookRepository) UpdateParentID(ctx context.Context, id uuid.UUID, parentID *uuid.UUID) error {
+	span, _ := apm.StartSpan(ctx, "UpdateParentID", "Repository")
+	defer span.End()
+	start := time.Now()
+	memBefore := helpers.TrackMemory()
+	_, err := n.db.Exec(
+		ctx,
+		`UPDATE notebook SET parent_id = $1, updated_at = $2 WHERE id = $3 AND is_deleted = false`,
+		parentID,
+		time.Now(),
+		id,
+	)
+	defer helpers.LogExecution(
+		n.Logger,
+		start,
+		&err,
+		memBefore,
+		"Repository: Update Parent ID",
+		map[string]interface{}{
+			"notebook_id": id,
+			"parent_id":   parentID,
 		},
 	)
 	return nil

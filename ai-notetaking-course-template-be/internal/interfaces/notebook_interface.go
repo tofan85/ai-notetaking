@@ -17,6 +17,8 @@ type INotebookRepository interface {
 	UpdateByID(ctx context.Context, notebook *entity.Notebook) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	NullifyParentById(ctx context.Context, id uuid.UUID) error
+	UpdateParentID(ctx context.Context, id uuid.UUID, parentID *uuid.UUID) error
+	GetAll(cxt context.Context) ([]*entity.Notebook, error)
 }
 
 type INotebookService interface {
@@ -24,6 +26,8 @@ type INotebookService interface {
 	Show(ctx context.Context, id uuid.UUID) (*dto.ShowNotebookResponse, error)
 	UpdateNotebook(ctx context.Context, req *dto.UpdateNotebookRequest) (*dto.UpdateNotebookResponse, error)
 	Delete(ctx context.Context, id uuid.UUID) error
+	MoveNotebook(ctx context.Context, req *dto.MoveNotebookRequest) (*dto.MoveNotebookResponse, error)
+	GetAll(ctx context.Context) ([]*dto.GetAllNotebookResponse, error)
 }
 
 type INotebookController interface {
@@ -31,4 +35,6 @@ type INotebookController interface {
 	Create(ctx *fiber.Ctx) error
 	Show(ctx *fiber.Ctx) error
 	Delete(ctx *fiber.Ctx) error
+	MoveNotebook(ctx *fiber.Ctx) error
+	GetAllRoutes(ctx *fiber.Ctx) error
 }
