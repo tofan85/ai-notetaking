@@ -46,7 +46,7 @@ func (c *notebookService) GetAll(ctx context.Context) ([]*dto.GetAllNotebookResp
 
 		result = append(result, &res)
 	}
-	log.Printf("[SERVICE] CreateNotebook - SUCCESS ")
+	log.Printf("[SERVICE] GetAll - SUCCESS ")
 	return result, nil
 }
 

@@ -14,6 +14,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 	apmFiber "go.elastic.co/apm/module/apmfiber"
 )
@@ -27,6 +28,7 @@ func main() {
 		BodyLimit: 10 * 1024 * 1024,
 	})
 	logger := loggers.Logger{}
+	app.Use(cors.New())
 	app.Use(middleware.LoggingMiddleware(logger))
 	app.Use(apmFiber.Middleware())
 

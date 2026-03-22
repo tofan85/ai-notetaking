@@ -36,7 +36,7 @@ func (n *notebookRepository) GetAll(ctx context.Context) ([]*entity.Notebook, er
 	defer span.End()
 	start := time.Now()
 	memBefore := helpers.TrackMemory()
-	var notebook entity.Notebook
+
 	rows, err := n.db.Query(
 		ctx,
 		`SELECT id, name, parent_id, created_at, updated_at, is_deleted FROM notebook WHERE  is_deleted = false`,
@@ -47,9 +47,8 @@ func (n *notebookRepository) GetAll(ctx context.Context) ([]*entity.Notebook, er
 	}
 
 	result := make([]*entity.Notebook, 0)
-
 	for rows.Next() {
-		var notebook entity.Notebook
+		notebook := entity.Notebook{}
 		err = rows.Scan(
 			&notebook.ID,
 			&notebook.Name,
@@ -63,7 +62,7 @@ func (n *notebookRepository) GetAll(ctx context.Context) ([]*entity.Notebook, er
 			return nil, err
 		}
 
-		result = append([]*entity.Notebook{&notebook}, result...)
+		result = append(result, &notebook)
 	}
 	defer helpers.LogExecution(
 		n.Logger,
@@ -71,9 +70,7 @@ func (n *notebookRepository) GetAll(ctx context.Context) ([]*entity.Notebook, er
 		&err,
 		memBefore,
 		"Repository: Get Notebook BY ID",
-		map[string]interface{}{
-			"notebook_id": notebook.ID,
-		},
+		map[string]interface{}{},
 	)
 	return result, nil
 }
