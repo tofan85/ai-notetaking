@@ -122,7 +122,7 @@ func (n *notebookRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity
 	defer span.End()
 	start := time.Now()
 	memBefore := helpers.TrackMemory()
-	var notebook entity.Notebook
+	notebook := &entity.Notebook{}
 	err := n.db.QueryRow(
 		ctx,
 		`SELECT id, name, parent_id, created_at, updated_at, deleted_at, is_deleted FROM notebook WHERE id = $1 AND is_deleted = false`,
@@ -136,24 +136,32 @@ func (n *notebookRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity
 		&notebook.DeletedAt,
 		&notebook.IsDeleted,
 	)
+
+	defer func() {
+		helpers.LogExecution(
+			n.Logger, // atau helpers.Logger - konsisten!
+			start,
+			&err, // pointer ke err agar defer bisa lihat nilai final
+			memBefore,
+			"Repository: Get Notebook BY ID",
+			map[string]interface{}{
+				"notebook_id": id, // ✅ Gunakan id parameter, bukan notebook.ID (bisa nil)
+				"found":       err == nil,
+			},
+		)
+	}()
+
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			helpers.Logger.Warn("Notebook not found - ID: %s", id)
+			// ✅ Cek logger nil untuk test
+			if helpers.Logger != nil {
+				helpers.Logger.Warn("Notebook not found ")
+			}
 			return nil, serverutils.ErrNotFound
 		}
 		return nil, err
 	}
-	defer helpers.LogExecution(
-		n.Logger,
-		start,
-		&err,
-		memBefore,
-		"Repository: Get Notebook BY ID",
-		map[string]interface{}{
-			"notebook_id": notebook.ID,
-		},
-	)
-	return &notebook, nil
+	return notebook, nil
 }
 
 func (n *notebookRepository) UpdateByID(ctx context.Context, notebook *entity.Notebook) error {
